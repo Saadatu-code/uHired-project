@@ -1,0 +1,161 @@
+/* src/index.css */
+
+/* 1. Import Inter font weights from Fontsource */
+@import "@fontsource/inter/400.css"; /* Regular */
+@import "@fontsource/inter/500.css"; /* Medium */
+@import "@fontsource/inter/600.css"; /* Semi-Bold */
+@import "@fontsource/inter/700.css"; /* Bold */
+/* You can also import italic styles if needed, e.g., @import "@fontsource/inter/700-italic.css"; */
+
+/* 1. Import Tailwind's base, components, and utilities */
+@import "tailwindcss";
+
+/* 2. Define your custom theme using CSS-first configuration from uhired Design System */
+@theme {
+  /* Font Family */
+  --font-sans: "Inter", system-ui, sans-serif;
+  /* Add other font families if needed, e.g., --font-mono */
+
+  /* Primary Colors (Blue Tones) */
+  --color-primary-action: #5c8dff;
+  --color-primary-light: #d3e1ff;
+  --color-primary-lighter: #dde7ff;
+  /* A darker primary blue for hover states as per your design system (used in buttons) */
+  --color-primary-action-hover: #437dff;
+
+  /* Secondary Colors (Purple Tones) */
+  --color-secondary-purple: #4f46e5;
+  --color-secondary-light-purple: #f3ebffc;
+  /* A darker secondary purple for hover states (used in AI Assist button) */
+  --color-secondary-purple-hover: #7a4ae3;
+
+  /* Action & Accent Colors */
+  --color-action-yellow: #facc15;
+  --color-action-pink: #ff6b81;
+  --color-action-pink-hover: #ff4d6a; /* From Destructive Button hover */
+  --color-action-light-pink: #ff99cc;
+
+  /* Overlay Colors */
+  --color-tooltip-bg: #e8e8e8; /* Light gray for tooltips */
+  --color-tooltip-text: #313131; /* Darker text color for better contrast in tooltips */
+
+  /* Utility & Status Colors */
+  --color-success-green: #22c55e;
+  --color-error-red: #dc2626;
+  --color-warning-bg: #fffbeb; /* Background for warning alerts */
+  --color-info-bg: #e7f1fd; /* Background for info alerts */
+
+  /* Greyscale & Text Colors (Naming convention based on usage) */
+  --color-page-background: #f8fafc;
+  --color-component-background: #ffffff;
+  --color-text-heading-primary: #111827; /* Tailwind gray-900 */
+  --color-text-heading-secondary: #1f2937; /* Tailwind gray-800 */
+  --color-text-body: #374151; /* Tailwind gray-700 */
+  --color-text-body-light: #4b5563; /* Tailwind gray-600 */
+  --color-text-subtle: #6b7280; /* Tailwind gray-500 */
+  --color-text-placeholder: #9ca3af; /* Tailwind gray-400, commonly used for placeholders */
+  --color-text-white: #ffffff;
+  --color-text-black: #000000;
+
+  --color-border-light: #e5e7eb; /* Tailwind gray-200 */
+  --color-border-medium: #d1d5db; /* Tailwind gray-300 (form inputs) */
+
+  /* You can extend other theme values if needed, e.g., spacing, breakpoints */
+  /* extend: {
+       --spacing-128: 32rem;
+       --breakpoint-3xl: "1920px";
+       --border-radius-standard: 0.5rem; // maps to rounded-lg
+       --border-radius-large: 0.75rem; // maps to rounded-xl
+     }
+  */
+}
+
+/* 3. Add custom base layer styles */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-page-background);
+    color: var(--color-text-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-[44px] font-bold leading-[56px] text-[var(--color-text-heading-primary)];
+  } /* From H1 spec */
+  h2 {
+    @apply text-[40px] font-bold leading-[50px] text-[var(--color-text-heading-secondary)];
+  } /* From H2 spec */
+  h3 {
+    @apply text-3xl font-semibold text-[var(--color-text-heading-secondary)];
+  } /* From H3 spec */
+  h4 {
+    @apply text-2xl font-semibold text-[var(--color-text-body)];
+  } /* From H4 spec, color adjusted to body as per design */
+  h5 {
+    @apply text-xl font-medium text-[var(--color-text-body)];
+  } /* From H5 spec, color adjusted to body as per design */
+
+  /* Default link styles (can be overridden by utility classes) */
+  a {
+    @apply font-medium text-[var(--color-primary-action)];
+  }
+  a:hover {
+    @apply text-[var(--color-primary-action-hover)] underline; /* From Links spec */
+  }
+
+  /* Add other base styles here based on your design system's general rules */
+}
+
+/* 4. Optional: Add custom component classes (use sparingly with utility-first) */
+/* You can define reusable component styles here if needed, for example:
+@layer components {
+  .btn-primary {
+    @apply py-2.5 px-5 bg-[var(--color-primary-action)] text-[var(--color-text-white)] font-semibold rounded-lg shadow-md hover:bg-[var(--color-primary-action-hover)] hover:shadow-lg transition duration-150 ease-in-out;
+  }
+}
+*/
+/* However, many of your component styles in the design system can be achieved by directly applying Tailwind utilities in your JSX. */
+@layer utilities {
+  .animate-pulse-slow {
+    animation: pulse-feature 4s ease-in-out infinite;
+  }
+  @keyframes pulse-feature {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.03);
+    }
+  }
+  .tooltip-bubble-left {
+    position: relative; /* Needed for the pseudo-element positioning */
+  }
+
+  /* In src/index.css - Ensure this is present and colors are correct */
+
+  @layer utilities {
+    /* ... your existing utilities ... */
+
+    .tooltip-bubble-purple-left::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%; /* Triangle on the left, pointing left */
+      margin-top: -6px; /* Half of border-width to vertically center */
+      border-width: 6px; /* Size of the triangle */
+      border-style: solid;
+      /* Triangle color should match the tooltip background */
+      border-color: transparent var(--color-tooltip-bg) transparent transparent;
+    }
+
+    /* If your tooltip span has a border and you want the callout to also appear bordered.
+     The tooltip span currently has `border border-purple-200`.
+     We'll use a slightly darker purple for the arrow border or match `border-purple-200` if defined.
+     Let's use `var(--color-secondary-purple)` for a slightly more defined arrow border.
+  */
+  }
+}
