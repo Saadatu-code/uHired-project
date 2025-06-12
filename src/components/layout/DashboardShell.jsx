@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 
-// Icons for Sidebar (default size 16x16 for w-4 h-4)
-const HomeIcon = () => (
+// Icons for Sidebar navItems
+const HomeIcon = ({ className = "w-5 h-5" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -15,12 +15,13 @@ const HomeIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
   >
     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
     <polyline points="9 22 9 12 15 12 15 22"></polyline>
   </svg>
 );
-const SearchIcon = () => (
+const SearchIcon = ({ className = "w-5 h-5" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -31,12 +32,13 @@ const SearchIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
   >
     <circle cx="11" cy="11" r="8"></circle>
     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
   </svg>
 );
-const FileIcon = () => (
+const FileIcon = ({ className = "w-5 h-5" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -47,6 +49,7 @@ const FileIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
   >
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
     <polyline points="14 2 14 8 20 8"></polyline>
@@ -54,7 +57,7 @@ const FileIcon = () => (
     <line x1="16" y1="17" x2="8" y2="17"></line>
   </svg>
 );
-const MailIcon = () => (
+const MailIcon = ({ className = "w-5 h-5" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -65,12 +68,13 @@ const MailIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
   >
     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
     <polyline points="22,6 12,13 2,6"></polyline>
   </svg>
 );
-const BookOpenIcon = () => (
+const BookOpenIcon = ({ className = "w-5 h-5" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -81,12 +85,13 @@ const BookOpenIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
   >
     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
   </svg>
 );
-const MessageCircleIcon = () => (
+const MessageCircleIcon = ({ className = "w-5 h-5" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -97,44 +102,13 @@ const MessageCircleIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
   >
     <path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"></path>
     <rect x="3" y="4" width="18" height="18" rx="2"></rect>
     <circle cx="12" cy="10" r="2"></circle>
     <line x1="12" y1="2" x2="12" y2="4"></line>
     <line x1="12" y1="14" x2="12" y2="16"></line>
-  </svg>
-);
-const IconCollapseState = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="11 7 6 12 11 17"></polyline>
-    <polyline points="18 7 13 12 18 17"></polyline>
-  </svg>
-);
-const IconExpandState = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="13 17 18 12 13 7"></polyline>
-    <polyline points="6 17 11 12 6 7"></polyline>
   </svg>
 );
 
@@ -182,50 +156,61 @@ const DashboardShell = ({
   activeSectionId,
   onNavItemClick,
   userName,
+  userEmail,
+  userAvatarUrl,
   navigateTo,
+  currentTheme,
+  toggleTheme,
 }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
-    localStorage.getItem("uHiredSidebarCollapsed") === "true"
-  );
-
-  useEffect(() => {
-    document.body.classList.toggle("sidebar-is-collapsed", isSidebarCollapsed);
-  }, [isSidebarCollapsed]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("uHiredSidebarCollapsed") === "true";
+    }
+    return false;
+  });
 
   const toggleSidebarCollapse = () => {
-    const newState = !isSidebarCollapsed;
-    setIsSidebarCollapsed(newState);
-    localStorage.setItem("uHiredSidebarCollapsed", newState.toString());
+    setIsSidebarCollapsed((prevCollapsed) => {
+      const newState = !prevCollapsed;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("uHiredSidebarCollapsed", newState.toString());
+      }
+      return newState;
+    });
   };
 
   return (
-    <div className="flex h-screen bg-page-background font-sans">
+    <div className="flex h-screen font-sans bg-[var(--color-page-background)]">
       <Sidebar
         navItems={navItemsList}
-        collapseButtonIcons={{
-          collapse: <IconCollapseState />,
-          expand: <IconExpandState />,
-        }}
         isSidebarCollapsed={isSidebarCollapsed}
         toggleSidebarCollapse={toggleSidebarCollapse}
         activeSectionId={activeSectionId}
         onNavItemClick={onNavItemClick}
+        currentTheme={currentTheme}
       />
-      <main
-        id="mainContentArea"
-        className={`main-content-area flex-1 flex flex-col overflow-y-auto transition-all duration-300 ease-in-out ${
+      <div
+        id="mainContentAreaContainer"
+        className={`flex-1 flex flex-col bg-[var(--color-page-background)] transition-all duration-300 ease-out ${
           isSidebarCollapsed ? "ml-14" : "ml-48"
         }`}
       >
-        {" "}
-        {/* Adjusted for w-14 and w-48 */}
-        <TopNavbar userName={userName} navigateTo={navigateTo} />
-        <div className="p-6 sm:p-8 md:p-10 flex-grow">{children}</div>
-        <footer className="mt-auto p-6 border-t border-border-light text-center text-xs text-text-subtle">
+        <TopNavbar
+          userName={userName}
+          userEmail={userEmail}
+          userAvatarUrl={userAvatarUrl}
+          navigateTo={navigateTo}
+          toggleTheme={toggleTheme}
+          currentTheme={currentTheme}
+        />
+        <main className="flex-1 flex flex-col overflow-y-auto bg-[var(--color-page-background)] p-6 md:p-8">
+          <div className="flex-grow h-full">{children}</div>
+        </main>
+        <footer className="p-2 text-center text-xs text-[var(--color-text-subtle)] bg-[var(--color-page-background)] border-t border-[var(--color-border-light)] flex-shrink-0">
           &copy; {new Date().getFullYear()} uHired. All rights reserved. Your
           Intelligent Career Companion.
         </footer>
-      </main>
+      </div>
     </div>
   );
 };

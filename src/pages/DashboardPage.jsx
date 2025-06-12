@@ -1,333 +1,847 @@
-// src/pages/NewDashboardPage.jsx
-import React, { useState, useEffect, useRef } from 'react';
+// src/pages/DashboardPage.jsx
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
-// --- SVG Icons (as defined in the HTML example) ---
-const HomeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
-const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
-const FileIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>;
-const MailIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>;
-const BriefcaseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.25 14.155V7.845a2.25 2.25 0 00-2.25-2.25h-12A2.25 2.25 0 003.75 7.845v6.31M21 14.155V19.5a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 19.5v-5.345M15.75 8.25h-7.5" /></svg>;
-const MessageCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7.5 8.25h9m-9 3H12m-6.75 3h9m-9 3h9M3.75 6.75h16.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>;
-const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
-const IconCollapse = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="11 7 6 12 11 17"></polyline><polyline points="18 7 13 12 18 17"></polyline></svg>;
-const IconExpand = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>;
-const ThemeToggleSunIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>;
-const ThemeToggleMoonIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>;
-const NotificationIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
-// --- End Icons ---
+// --- SVG Icon Components ---
+// To keep this as a single file, all icons are defined here.
 
+const BellIcon = ({ className = "w-6 h-6" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    <circle cx="18" cy="5" r="3" fill="var(--color-error-red)" stroke="none" />
+  </svg>
+);
 
-function DashboardPage({ navigateTo, userName = "Saadatu" }) { // navigateTo prop for App.jsx router
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(localStorage.getItem('sidebarCollapsed') === 'true');
-  const [activeSection, setActiveSection] = useState(localStorage.getItem('activeDashboardSection') || 'dashboard-content');
-  const [currentTheme, setCurrentTheme] = useState(localStorage.getItem('theme') || 'light');
-  
-  // Refs for modal elements (if needed for direct manipulation, otherwise manage with state)
-  const messageModalRef = useRef(null);
-  const modalTitleElRef = useRef(null);
-  const modalMessageElRef = useRef(null);
+const SecurityShieldIcon = ({ className = "w-6 h-6" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  </svg>
+);
 
-  const GEMINI_API_KEY = ""; // User needs to add their API key here for AI features
+const MatchIcon = ({ className = "w-4 h-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+  </svg>
+);
 
-  useEffect(() => {
-    document.body.classList.toggle('sidebar-is-collapsed', isSidebarCollapsed);
-    localStorage.setItem('sidebarCollapsed', isSidebarCollapsed.toString());
-  }, [isSidebarCollapsed]);
+const PdfLogoIcon = ({ className = "w-5 h-5" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="96px"
+    height="96px"
+    viewBox="0 0 56 64"
+    enableBackground="new 0 0 56 64"
+    xmlSpace="preserve"
+    className={className}
+  >
+    <g>
+      {" "}
+      <path
+        fill="#AD0B00"
+        d="M5.1,0C2.3,0,0,2.3,0,5.1v53.8C0,61.7,2.3,64,5.1,64h45.8c2.8,0,5.1-2.3,5.1-5.1V20.3L37.1,0H5.1z"
+      ></path>{" "}
+      <path
+        fill="#7A0000"
+        d="M56,20.4v1H43.2c0,0-6.3-1.3-6.1-6.7c0,0,0.2,5.7,6,5.7H56z"
+      ></path>{" "}
+      <path
+        opacity="0.5"
+        fill="#FFFFFF"
+        enableBackground="new "
+        d="M37.1,0v14.6c0,1.7,1.1,5.8,6.1,5.8H56L37.1,0z"
+      ></path>{" "}
+    </g>{" "}
+    <path
+      fill="#FFFFFF"
+      d="M14.9,49h-3.3v4.1c0,0.4-0.3,0.7-0.8,0.7c-0.4,0-0.7-0.3-0.7-0.7V42.9c0-0.6,0.5-1.1,1.1-1.1h3.7 c2.4,0,3.8,1.7,3.8,3.6C18.7,47.4,17.3,49,14.9,49z M14.8,43.1h-3.2v4.6h3.2c1.4,0,2.4-0.9,2.4-2.3C17.2,44,16.2,43.1,14.8,43.1z M25.2,53.8h-3c-0.6,0-1.1-0.5-1.1-1.1v-9.8c0-0.6,0.5-1.1,1.1-1.1h3c3.7,0,6.2,2.6,6.2,6C31.4,51.2,29,53.8,25.2,53.8z M25.2,43.1 h-2.6v9.3h2.6c2.9,0,4.6-2.1,4.6-4.7C29.9,45.2,28.2,43.1,25.2,43.1z M41.5,43.1h-5.8V47h5.7c0.4,0,0.6,0.3,0.6,0.7 s-0.3,0.6-0.6,0.6h-5.7v4.8c0,0.4-0.3,0.7-0.8,0.7c-0.4,0-0.7-0.3-0.7-0.7V42.9c0-0.6,0.5-1.1,1.1-1.1h6.2c0.4,0,0.6,0.3,0.6,0.7 C42.2,42.8,41.9,43.1,41.5,43.1z"
+    ></path>
+  </svg>
+);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', currentTheme === 'dark');
-    localStorage.setItem('theme', currentTheme);
-  }, [currentTheme]);
+const DocLogoIcon = ({ className = "w-5 h-5" }) => (
+  <svg
+    width="87px"
+    height="87px"
+    viewBox="-4 0 64 64"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="#000000"
+    className={className}
+  >
+    <g fillRule="evenodd">
+      {" "}
+      <path
+        d="m5.11 0a5.07 5.07 0 0 0 -5.11 5v53.88a5.07 5.07 0 0 0 5.11 5.12h45.78a5.07 5.07 0 0 0 5.11-5.12v-38.6l-18.94-20.28z"
+        fill="#107CAD"
+      ></path>{" "}
+      <path
+        d="m56 20.35v1h-12.82s-6.31-1.26-6.13-6.71c0 0 .21 5.71 6 5.71z"
+        fill="#084968"
+      ></path>{" "}
+      <path
+        d="m37.07 0v14.56a5.78 5.78 0 0 0 6.11 5.79h12.82z"
+        fill="#90D0FE"
+        opacity=".5"
+      ></path>{" "}
+    </g>{" "}
+    <path
+      d="m14.24 53.86h-3a1.08 1.08 0 0 1 -1.08-1.08v-9.85a1.08 1.08 0 0 1 1.08-1.08h3a6 6 0 1 1 0 12zm0-10.67h-2.61v9.34h2.61a4.41 4.41 0 0 0 4.61-4.66 4.38 4.38 0 0 0 -4.61-4.68zm14.42 10.89a5.86 5.86 0 0 1 -6-6.21 6 6 0 1 1 11.92 0 5.87 5.87 0 0 1 -5.92 6.21zm0-11.09c-2.7 0-4.41 2.07-4.41 4.88s1.71 4.88 4.41 4.88 4.41-2.09 4.41-4.88-1.72-4.87-4.41-4.87zm18.45.38a.75.75 0 0 1 .2.52.71.71 0 0 1 -.7.72.64.64 0 0 1 -.51-.24 4.06 4.06 0 0 0 -3-1.38 4.61 4.61 0 0 0 -4.63 4.88 4.63 4.63 0 0 0 4.63 4.88 4 4 0 0 0 3-1.37.7.7 0 0 1 .51-.24.72.72 0 0 1 .7.74.78.78 0 0 1 -.2.51 5.33 5.33 0 0 1 -4 1.69 6.22 6.22 0 0 1 0-12.43 5.26 5.26 0 0 1 4 1.72z"
+      fill="#ffffff"
+    ></path>
+  </svg>
+);
 
-  useEffect(() => {
-    // Handle initial section display based on hash or default
-    const hash = window.location.hash.substring(1);
-    const targetSection = document.querySelector(`.sidebar-item[id='${hash}']`)?.dataset.section || 'dashboard-content';
-    setActiveSectionAndItem(targetSection);
+const MoreIcon = ({ className = "w-5 h-5" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <circle cx="12" cy="12" r="1"></circle>
+    <circle cx="12" cy="5" r="1"></circle>
+    <circle cx="12" cy="19" r="1"></circle>
+  </svg>
+);
 
-    // Update current year in footer
-    const currentYearEl = document.getElementById('currentYear');
-    if (currentYearEl) currentYearEl.textContent = new Date().getFullYear();
-  }, []);
+const UploadIcon = ({ className = "w-5 h-5" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+    <polyline points="17 8 12 3 7 8"></polyline>
+    <line x1="12" y1="3" x2="12" y2="15"></line>
+  </svg>
+);
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(prevState => !prevState);
+const CheckCircleIcon = ({ className = "w-4 h-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    className={className}
+  >
+    <path
+      fillRule="evenodd"
+      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
+const KeyboardIcon = ({ className = "w-6 h-6" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect x="2" y="3" width="20" height="18" rx="2" ry="2"></rect>
+    <path d="M6 8h.01"></path>
+    <path d="M10 8h.01"></path>
+    <path d="M14 8h.01"></path>
+    <path d="M18 8h.01"></path>
+    <path d="M8 12h.01"></path>
+    <path d="M12 12h.01"></path>
+    <path d="M16 12h.01"></path>
+    <path d="M7 16h10"></path>
+  </svg>
+);
+
+const RefreshCwIcon = ({ className = "w-4 h-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+    <path d="M21 3v5h-5"></path>
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+    <path d="M3 21v-5h5"></path>
+  </svg>
+);
+
+const TrendingUpIcon = ({ className = "w-6 h-6" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+    <polyline points="17 6 23 6 23 12"></polyline>
+  </svg>
+);
+
+const MapPinIcon = ({ className = "w-4 h-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+    <circle cx="12" cy="10" r="3"></circle>
+  </svg>
+);
+
+const InfoIcon = ({ className = "w-4 h-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="12" y1="16" x2="12" y2="12"></line>
+    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+  </svg>
+);
+
+// --- Main Dashboard Page Component ---
+const DashboardPage = ({ userName = "Saadatu Yakubu" }) => {
+  const [showWins, setShowWins] = useState(true);
+
+  // --- Game State ---
+  const GAME_DURATION = 30; // seconds
+  const gameSentences = [
+    "The quick brown fox jumps over the lazy dog.",
+    "Software engineering requires logical thinking.",
+    "A well-tailored resume can open many doors.",
+    "Persistence is key in the modern job market.",
+    "Continuous learning is vital for a tech career.",
+  ];
+  const [sentence, setSentence] = useState(gameSentences[0]);
+  const [typedText, setTypedText] = useState("");
+  const [gameActive, setGameActive] = useState(false);
+  const [timer, setTimer] = useState(GAME_DURATION);
+  const [results, setResults] = useState({ wpm: 0, accuracy: 0 });
+  const intervalRef = useRef(null);
+  const inputRef = useRef(null);
+  const startTimeRef = useRef(0);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
   };
 
-  const setActiveSectionAndItem = (sectionId) => {
-    setActiveSection(sectionId);
-    localStorage.setItem('activeDashboardSection', sectionId);
+  const firstName = userName.split(" ")[0];
 
-    // Update active class on sidebar items
-    document.querySelectorAll('.sidebar-item, .settings-item').forEach(item => {
-      item.classList.remove('bg-uhired-primary-blue', 'text-white', 'active-item');
-      item.classList.add('text-uhired-gray-600', 'hover:bg-uhired-primary-lighter-blue', 'hover:text-uhired-primary-blue');
-      const icon = item.querySelector('svg');
-      if (icon) {
-        icon.style.stroke = "currentColor"; // Reset stroke
-        icon.style.color = "var(--uhired-gray-600)"; // Reset color
-      }
-    });
-    const activeItem = document.querySelector(`[data-section='${sectionId}']`);
-    if (activeItem) {
-      activeItem.classList.add('bg-uhired-primary-blue', 'text-white', 'active-item');
-      activeItem.classList.remove('text-uhired-gray-600', 'hover:bg-uhired-primary-lighter-blue', 'hover:text-uhired-primary-blue');
-      const icon = activeItem.querySelector('svg');
-      if (icon) {
-        icon.style.stroke = "white";
-        icon.style.color = "white";
-      }
+  const startGame = () => {
+    setGameActive(true);
+    setTypedText("");
+    setResults({ wpm: 0, accuracy: 0 });
+    setTimer(GAME_DURATION);
+
+    // Ensure the next sentence is different from the current one
+    let newSentence = sentence;
+    while (newSentence === sentence) {
+      newSentence =
+        gameSentences[Math.floor(Math.random() * gameSentences.length)];
+    }
+    setSentence(newSentence);
+
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+    startTimeRef.current = Date.now();
+    intervalRef.current = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current);
+          endGame();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const endGame = useCallback(() => {
+    if (!gameActive) return; // Prevent multiple calls
+
+    setGameActive(false);
+    clearInterval(intervalRef.current);
+
+    if (typedText && typedText.trim().length > 0) {
+      const timeElapsed = (Date.now() - startTimeRef.current) / 1000 / 60; // in minutes
+      const wordsTyped = typedText.trim().split(/\s+/).filter(Boolean).length;
+      const wpm = timeElapsed > 0 ? Math.round(wordsTyped / timeElapsed) : 0;
+
+      let correctChars = 0;
+      typedText.split("").forEach((char, index) => {
+        if (sentence[index] === char) {
+          correctChars++;
+        }
+      });
+      const accuracy = Math.round((correctChars / typedText.length) * 100) || 0;
+
+      setResults({ wpm, accuracy });
+    } else {
+      setResults({ wpm: 0, accuracy: 0 });
+    }
+  }, [gameActive, typedText, sentence]);
+
+  useEffect(() => {
+    if (timer <= 0 && gameActive) {
+      endGame();
+    }
+    return () => clearInterval(intervalRef.current); // Cleanup on unmount
+  }, [timer, gameActive, endGame]);
+
+  const handleTyping = (e) => {
+    if (!gameActive) return;
+    setTypedText(e.target.value);
+    if (e.target.value === sentence) {
+      endGame();
     }
   };
 
-  const showModal = (title, message) => {
-    if (modalTitleElRef.current) modalTitleElRef.current.textContent = title;
-    if (modalMessageElRef.current) modalMessageElRef.current.textContent = message;
-    if (messageModalRef.current) messageModalRef.current.classList.add('active');
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && gameActive) {
+      e.preventDefault();
+      endGame();
+    }
   };
 
-  const hideModal = () => {
-    if (messageModalRef.current) messageModalRef.current.classList.remove('active');
-  };
-
-  const handleThemeToggle = () => {
-    setCurrentTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
-  const handleLogout = () => {
-    showModal("Logged Out", "You have been successfully logged out.");
-    setTimeout(() => {
-        navigateTo('login'); // Use navigateTo prop for routing
-    }, 2000);
-  };
-  
-  // uHired navigation items
-  const navItems = [
-    { id: "dashboard", name: "Dashboard", icon: <HomeIcon />, section: "dashboard-content" },
-    { id: "job-finder", name: "Job Finder", icon: <SearchIcon />, section: "job-finder-content" },
-    { id: "resume-builder", name: "Resume Builder", icon: <FileIcon />, section: "resume-builder-content" },
-    { id: "cover-letter", name: "Cover Letter", icon: <MailIcon />, section: "cover-letter-content" },
-    { id: "career-guide", name: "Career Guide", icon: <BriefcaseIcon />, section: "career-guide-content" }, // Changed icon
-    { id: "interview-coach", name: "Interview Coach", icon: <MessageCircleIcon />, section: "interview-coach-content" },
+  // Dummy data for other components
+  const jobMatches = [
+    {
+      id: 1,
+      title: "Senior DevOps Engineer",
+      company: "Monzo Bank",
+      location: "London, UK (Hybrid)",
+      match: 92,
+      salary: "£85,000 - £110,000",
+      isEasyApply: true,
+    },
+    {
+      id: 2,
+      title: "Full-Stack Engineer (Python/React)",
+      company: "Deliveroo",
+      location: "Manchester, UK",
+      match: 85,
+      salary: "£70,000 - £90,000",
+      isEasyApply: false,
+    },
   ];
 
-  // Placeholder for API call function (would be more complex in React)
-  const callGeminiAPI = async (prompt, loadingSpinnerId, outputElementId, buttonId) => {
-    const loadingSpinnerElement = document.getElementById(loadingSpinnerId);
-    const outputElement = document.getElementById(outputElementId);
-    const buttonElement = document.getElementById(buttonId);
+  const skillData = [
+    { name: "Cloud Computing (AWS/Azure)", level: "Advanced", progress: 85 },
+    { name: "DevOps (Docker, Kubernetes)", level: "Proficient", progress: 65 },
+    { name: "AI / Machine Learning", level: "Intermediate", progress: 40 },
+  ];
 
-    if (!GEMINI_API_KEY) {
-        showModal("API Key Missing", "Please add your Gemini API key in the script to use AI features.");
-        if(outputElement) outputElement.textContent = "API Key is missing.";
-        return;
-    }
-    if (!prompt.trim()) { showModal("Input Error", "Please provide the required input."); return; }
-    
-    if(loadingSpinnerElement) loadingSpinnerElement.classList.remove('hidden');
-    if(outputElement) outputElement.textContent = 'Generating... please wait a moment.';
-    
-    let originalButtonText = "";
-    let buttonTextSpan;
+  const devRecommendations = [
+    {
+      title: "Contribute to an Open Source Project",
+      desc: "Showcase your DevOps skills by contributing to a project that uses Kubernetes.",
+    },
+    {
+      title: "Build a Project with a new AI API",
+      desc: "Boost your AI/ML skills by creating a simple app using a trending AI service.",
+    },
+  ];
 
-    if (buttonElement) {
-         buttonTextSpan = buttonElement.querySelector('span:not(.loading-spinner)');
-         if(buttonTextSpan) originalButtonText = buttonTextSpan.textContent;
-         if(buttonTextSpan) buttonTextSpan.textContent = 'Generating...';
-         buttonElement.disabled = true;
-    }
-    // Actual API call logic would go here
-    console.log("Calling Gemini API with prompt:", prompt);
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-    if(outputElement) outputElement.textContent = "AI response would appear here.";
+  const applicationStats = [
+    { label: "Saved", count: 2, color: "text-slate-500" },
+    { label: "Applied", count: 12, color: "text-sky-600 dark:text-sky-400" },
+    { label: "Interview", count: 3, color: "text-purple-500" },
+    { label: "Offer", count: 1, color: "text-green-500" },
+  ];
 
-    if(loadingSpinnerElement) loadingSpinnerElement.classList.add('hidden'); 
-    if (buttonElement) {
-        if(buttonTextSpan) buttonTextSpan.textContent = originalButtonText;
-        buttonElement.disabled = false;
-    }
+  const recentActivity = [
+    "Your application for Senior DevOps Engineer moved to the next stage!",
+    "An interview was scheduled with Coinbase for next Tuesday.",
+  ];
+
+  const handleLinkClick = (e) => e.preventDefault();
+
+  const getWpmFeedback = (wpm) => {
+    if (wpm > 60) return "Excellent speed!";
+    if (wpm > 40) return "Great focus!";
+    return "Solid attempt, keep practicing!";
   };
 
+  const gameButtonText =
+    results.wpm > 0 && !gameActive ? "Play Again" : "Start";
 
   return (
-    <div className={`flex h-screen ${isSidebarCollapsed ? 'sidebar-is-collapsed' : ''}`}>
-      <aside 
-        id="sidebar" 
-        className="sidebar-dynamic bg-white text-uhired-gray-700 shadow-xl flex flex-col shrink-0 fixed top-0 left-0 h-full z-30 border-r border-uhired-gray-200"
-      >
-        <div className="h-20 flex items-center px-6 shrink-0 sidebar-logo-container">
-          <h1 className="text-3xl font-extrabold text-uhired-primary-blue tracking-tight sidebar-logo-full">uHired</h1>
-          <div className="sidebar-logo-collapsed items-center justify-center w-full" title="uHired">
-            <div className="w-8 h-8 bg-uhired-primary-blue text-white flex items-center justify-center rounded-md text-xl font-bold">U</div>
+    <div className="w-full space-y-8">
+      {/* Header Section */}
+      <header>
+        <h1 className="text-2xl font-bold text-[var(--color-text-heading-primary)]">
+          {getGreeting()},{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+            {firstName}
+          </span>
+          !
+        </h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Let's land that dream role today.
+        </p>
+      </header>
+
+      {/* "Weekly Wins" Notification */}
+      {showWins && (
+        <div className="bg-green-100 dark:bg-green-900/30 border-l-4 border-green-500 text-green-800 dark:text-green-300 p-4 rounded-lg shadow-sm flex justify-between items-center transition-all duration-300 ease-in-out">
+          <div className="flex items-center">
+            <BellIcon className="mr-3 w-5 h-5 text-green-500" />
+            <p className="text-sm">
+              <span className="font-bold">Weekly Win!</span> You landed an
+              interview with Coinbase. Amazing progress!
+            </p>
           </div>
-        </div>
-
-        <nav className="flex-grow p-4 space-y-1.5 overflow-y-auto">
-          {navItems.map(item => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              id={item.id}
-              data-section={item.section}
-              title={item.name}
-              onClick={(e) => { e.preventDefault(); setActiveSectionAndItem(item.section); window.location.hash = item.id; }}
-              className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors duration-150 group sidebar-item ${
-                activeSection === item.section ? 'bg-uhired-primary-blue text-white active-item' : 'text-uhired-gray-600 hover:bg-uhired-primary-lighter-blue hover:text-uhired-primary-blue'
-              }`}
-            >
-              {item.icon}
-              <span className="font-medium text-sm sidebar-item-text">{item.name}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div className="px-4 pb-2 mt-auto">
-          <a href="#settings" id="settings" data-section="settings-content" title="Settings" 
-             onClick={(e) => { e.preventDefault(); setActiveSectionAndItem("settings-content"); window.location.hash = "settings";}}
-             className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors duration-150 group settings-item ${
-                activeSection === "settings-content" ? 'bg-uhired-primary-blue text-white active-item' : 'text-uhired-gray-600 hover:bg-uhired-primary-lighter-blue hover:text-uhired-primary-blue'
-             }`}>
-            <SettingsIcon />
-            <span className="font-medium text-sm sidebar-item-text">Settings</span>
-          </a>
-          <button title="Log Out" id="logoutButton" onClick={handleLogout}
-                  className="w-full flex items-center space-x-3 px-4 py-2.5 mt-1 text-sm text-uhired-gray-600 rounded-lg hover:bg-uhired-primary-lighter-blue hover:text-uhired-primary-blue transition-colors duration-150 logout-item group">
-            <LogoutIcon />
-            <span className="font-medium text-sm sidebar-item-text">Log Out</span>
+          <button
+            onClick={() => setShowWins(false)}
+            className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 text-2xl leading-none font-bold"
+            aria-label="Dismiss"
+          >
+            &times;
           </button>
         </div>
-        
-        <div className="p-4 border-t border-uhired-gray-200 shrink-0 collapse-button-container">
-          <button id="collapseSidebarBtn" onClick={toggleSidebar} className="w-full flex items-center space-x-3 px-4 py-2 text-uhired-gray-600 rounded-lg hover:bg-uhired-primary-lighter-blue hover:text-uhired-primary-blue transition-colors duration-150 group">
-            {isSidebarCollapsed ? <IconExpand /> : <IconCollapse />}
-            <span className="font-medium text-sm sidebar-item-text">{isSidebarCollapsed ? 'Expand' : 'Collapse'}</span>
-          </button>
-        </div>
-      </aside>
+      )}
 
-      <main id="mainContent" className={`main-content-area flex-1 overflow-y-auto bg-uhired-gray-50 ${isSidebarCollapsed ? 'main-content-area-collapsed' : 'main-content-area-expanded'}`}>
-        <header className="h-20 bg-white shadow-sm flex items-center justify-end px-6 sticky top-0 z-10 border-b border-uhired-gray-200">
-          <div className="flex items-center space-x-5">
-            <button title="Toggle Dark Mode" id="themeToggleBtn" onClick={handleThemeToggle} className="main-header-icon p-2 rounded-full hover:bg-uhired-gray-100 transition-colors">
-              {currentTheme === 'light' ? <ThemeToggleMoonIcon /> : <ThemeToggleSunIcon />}
-            </button>
-            <button title="Notifications" className="main-header-icon relative p-2 rounded-full hover:bg-uhired-gray-100 transition-colors">
-              <NotificationIcon />
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-uhired-error-red rounded-full ring-1 ring-white"></span>
-            </button>
-            <div title="User Profile" className="cursor-pointer" id="userProfileButton">
-              <img src={`https://placehold.co/36x36/DDE7FF/5C8DFF?text=${userName ? userName.charAt(0).toUpperCase() : 'U'}&font=inter`} alt="User Avatar" className="w-9 h-9 rounded-full object-cover ring-2 ring-uhired-primary-blue"/>
+      {/* Main Dashboard Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* --- Left Column (spans 2) --- */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Recommended Next Step Card */}
+          <div className="bg-[var(--color-component-background)] p-9 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)] border border-sky-200 dark:border-sky-700/50">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-3">
+              Recommended Next Step
+            </h2>
+            <div className="bg-sky-50 dark:bg-sky-900/20 p-4 rounded-lg flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center">
+                <SecurityShieldIcon className="text-sky-600 dark:text-sky-400 mr-4 flex-shrink-0 w-6 h-6" />
+                <div>
+                  <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
+                    Prep for your Coinbase interview
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-xs">
+                    Your interview is in 2 days. Let's run a final practice
+                    session.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleLinkClick}
+                className="bg-sky-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-sky-700 transition-colors whitespace-nowrap shadow-md"
+              >
+                Practice Now
+              </button>
             </div>
           </div>
-        </header>
-        
-        <div className="p-6 sm:p-8 md:p-10">
-          {/* Dashboard Content (Example) */}
-          <div id="dashboard-content" className={`content-section ${activeSection === 'dashboard-content' ? 'active-content-section' : ''} space-y-8`}>
-            <header className="mb-6">
-                <h2 className="text-4xl font-extrabold text-uhired-gray-800 tracking-tight">Welcome back, {userName}!</h2>
-                <p className="text-uhired-gray-600 mt-1 text-lg">Let uHired's AI guide your next step.</p>
-            </header>
-            <section>
-                <h3 className="text-2xl font-semibold text-uhired-gray-700 mb-4">Your AI Co-Pilot Suggests:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Suggestion Cards - Adapt content for uHired */}
-                    <div className="dashboard-card p-6 flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center space-x-3 mb-3">
-                                <SearchIcon />
-                                <h4 className="font-semibold text-lg text-uhired-gray-800">New Job Matches</h4>
-                            </div>
-                            <p className="text-uhired-gray-600 text-sm mb-4">We've found 12 new roles matching your profile. Review them now!</p>
-                        </div>
-                        <button data-target-section="job-finder-content" onClick={() => {setActiveSectionAndItem("job-finder-content"); window.location.hash="job-finder";}} className="navigate-btn mt-auto w-full px-4 py-2 bg-uhired-primary-blue text-white font-semibold rounded-lg hover:bg-uhired-primary-blue-hover transition-colors duration-150 text-sm">Open Job Finder</button>
+
+          {/* AI Job Matching Card */}
+          <div className="bg-[var(--color-component-background)] p-8 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)]">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-4">
+              Top AI Job Matches
+            </h2>
+            <div className="space-y-4">
+              {jobMatches.map((job) => (
+                <div
+                  key={job.id}
+                  className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-shadow duration-300 hover:shadow-md"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
+                        {job.title}
+                      </h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        {job.company} • {job.location}
+                      </p>
                     </div>
-                    <div className="dashboard-card p-6 flex flex-col justify-between">
-                       <div>
-                            <div className="flex items-center space-x-3 mb-3">
-                               <FileIcon/>
-                                <h4 className="font-semibold text-lg text-uhired-gray-800">Refine Your Resume</h4>
-                            </div>
-                            <p className="text-uhired-gray-600 text-sm mb-4">Strengthen your resume for roles requiring specific skills. Let's tailor it.</p>
-                        </div>
-                        <button data-target-section="resume-builder-content" onClick={() => {setActiveSectionAndItem("resume-builder-content"); window.location.hash="resume-builder";}} className="navigate-btn mt-auto w-full px-4 py-2 bg-uhired-primary-blue text-white font-semibold rounded-lg hover:bg-uhired-primary-blue-hover transition-colors duration-150 text-sm">Go to Resume Builder</button>
+                    <div
+                      className={`mt-2 sm:mt-0 flex items-center space-x-2 text-xs font-semibold px-2.5 py-1 rounded-full h-fit ${
+                        job.match > 89
+                          ? "text-green-600 dark:text-green-300 bg-green-100 dark:bg-green-900/40"
+                          : "text-amber-600 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40"
+                      }`}
+                    >
+                      <MatchIcon />
+                      <span>{job.match}% Match</span>
                     </div>
-                     <div className="dashboard-card p-6 flex flex-col justify-between">
-                       <div>
-                            <div className="flex items-center space-x-3 mb-3">
-                                <MessageCircleIcon/>
-                                <h4 className="font-semibold text-lg text-uhired-gray-800">Interview Prep</h4>
-                            </div>
-                            <p className="text-uhired-gray-600 text-sm mb-4">Upcoming interview? Sharpen responses with the AI Coach.</p>
-                        </div>
-                        <button data-target-section="interview-coach-content" onClick={() => {setActiveSectionAndItem("interview-coach-content"); window.location.hash="interview-coach";}} className="navigate-btn mt-auto w-full px-4 py-2 bg-uhired-primary-blue text-white font-semibold rounded-lg hover:bg-uhired-primary-blue-hover transition-colors duration-150 text-sm">Start Interview Practice</button>
+                  </div>
+                  <div className="flex items-center justify-between mt-3">
+                    <p className="text-xs font-medium text-green-600 dark:text-green-400">
+                      {job.salary}
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      {job.isEasyApply && (
+                        <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/40 px-2 py-0.5 rounded-full">
+                          EASY APPLY
+                        </span>
+                      )}
+                      <button
+                        onClick={handleLinkClick}
+                        className="bg-sky-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-sky-700 transition-colors shadow"
+                      >
+                        Apply
+                      </button>
                     </div>
+                  </div>
                 </div>
-            </section>
-            {/* Add other sections like Quick Access, Application Tracker here, styled similarly */}
+              ))}
+            </div>
           </div>
 
-          {/* Placeholder for other content sections */}
-          <div id="job-finder-content" className={`content-section ${activeSection === 'job-finder-content' ? 'active-content-section' : ''} bg-white p-6 rounded-lg shadow-lg`}>
-              <header className="mb-6"><h2 className="text-3xl font-bold text-uhired-gray-800">Job Finder</h2><p className="text-uhired-gray-600 mt-1">Discover your next career opportunity with AI precision.</p></header>
-              <p className="text-uhired-gray-700">Advanced job searching and filtering tools will appear here...</p>
+          {/* Market Insights Card */}
+          <div className="bg-[var(--color-component-background)] p-10 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)]">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-4 flex items-center">
+              <TrendingUpIcon className="mr-2 text-green-500" />
+              Market Insights
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Avg. Salary (UK)
+                </p>
+                <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                  £72,500
+                </p>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  In-Demand Tech
+                </p>
+                <div className="flex space-x-2 mt-1">
+                  <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-900/40 px-2 py-0.5 rounded-full">
+                    Go
+                  </span>
+                  <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-900/40 px-2 py-0.5 rounded-full">
+                    Rust
+                  </span>
+                  <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-900/40 px-2 py-0.5 rounded-full">
+                    AWS CDK
+                  </span>
+                </div>
+              </div>
+              <div className="md:col-span-2 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                  Hiring Hotspots
+                </p>
+                <div className="flex items-center text-xs text-slate-600 dark:text-slate-300 space-x-4">
+                  <span className="flex items-center">
+                    <MapPinIcon className="mr-1.5" />
+                    London
+                  </span>
+                  <span className="flex items-center">
+                    <MapPinIcon className="mr-1.5" />
+                    Manchester
+                  </span>
+                  <span className="flex items-center">
+                    <MapPinIcon className="mr-1.5" />
+                    Bristol
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div id="resume-builder-content" className={`content-section ${activeSection === 'resume-builder-content' ? 'active-content-section' : ''} bg-white p-6 rounded-lg shadow-lg`}>
-               <header className="mb-6"><h2 className="text-3xl font-bold text-uhired-gray-800">Resume Builder</h2><p className="text-uhired-gray-600 mt-1">Craft compelling, ATS-friendly resumes.</p></header>
-               <p className="text-uhired-gray-700">AI-powered resume creation and tailoring tools...</p>
+
+          {/* Stay Sharp Game Card */}
+          <div className="bg-[var(--color-component-background)] p-10 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)]">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-4 flex items-center">
+              <KeyboardIcon className="mr-2 text-purple-500" />
+              Stay Sharp: Typing Test
+            </h2>
+            <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg font-mono text-sm tracking-wider">
+              <p className="text-slate-600 dark:text-slate-300 mb-2 min-h-[40px]">
+                {sentence.split("").map((char, index) => {
+                  let color = "text-slate-500 dark:text-slate-400";
+                  if (index < typedText.length) {
+                    color =
+                      char === typedText[index]
+                        ? "text-green-500 dark:text-green-400"
+                        : "text-red-500 dark:text-red-400 underline";
+                  }
+                  return (
+                    <span key={index} className={color}>
+                      {char}
+                    </span>
+                  );
+                })}
+              </p>
+              <input
+                ref={inputRef}
+                type="text"
+                value={typedText}
+                onChange={handleTyping}
+                onKeyDown={handleKeyDown}
+                className="w-full bg-white dark:bg-slate-900 p-2 rounded-md text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-purple-500 outline-none"
+                disabled={!gameActive}
+                onPaste={(e) => e.preventDefault()}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-4">
+              <button
+                onClick={startGame}
+                disabled={gameActive}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-purple-700 transition-colors shadow-md flex items-center space-x-2 disabled:opacity-50"
+              >
+                <RefreshCwIcon />
+                <span>{gameButtonText}</span>
+              </button>
+              {gameActive && (
+                <p className="text-lg font-bold text-purple-500">{timer}s</p>
+              )}
+              {results.wpm > 0 && !gameActive && (
+                <div className="text-right">
+                  <p className="text-xs font-medium text-green-500">
+                    {getWpmFeedback(results.wpm)}
+                  </p>
+                  <p className="text-xl font-bold text-purple-600">
+                    {results.wpm} WPM{" "}
+                    <span className="text-sm font-medium text-slate-500">
+                      ({results.accuracy}% acc)
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-          <div id="cover-letter-content" className={`content-section ${activeSection === 'cover-letter-content' ? 'active-content-section' : ''} bg-white p-6 rounded-lg shadow-lg`}>
-              <header className="mb-6"><h2 className="text-3xl font-bold text-uhired-gray-800">Cover Letter Builder</h2><p className="text-uhired-gray-600 mt-1">Generate personalized cover letters that stand out.</p></header>
-               <h3 className="text-xl font-semibold text-uhired-gray-700 mb-4">AI Cover Letter Assistant</h3>
-               <div className="space-y-4">
-                   <div><label htmlFor="job-description-cl" className="block text-sm font-medium text-uhired-gray-700 mb-1">Paste Job Description:</label><textarea id="job-description-cl" rows="6" className="w-full p-3 border border-uhired-gray-300 rounded-md focus:ring-2 focus:ring-uhired-primary-blue focus:border-uhired-primary-blue transition-shadow" placeholder="Paste the full job description here..."></textarea></div>
-                   <div><label htmlFor="your-details-cl" className="block text-sm font-medium text-uhired-gray-700 mb-1">Briefly describe your key skills/experience for this role:</label><textarea id="your-details-cl" rows="3" className="w-full p-3 border border-uhired-gray-300 rounded-md focus:ring-2 focus:ring-uhired-primary-blue focus:border-uhired-primary-blue transition-shadow" placeholder="E.g., 5 years experience in project management..."></textarea></div>
-                   <button
-                     id="generate-cover-letter-btn"
-                     className="inline-flex items-center px-6 py-3 bg-uhired-primary-blue text-white font-semibold rounded-lg hover:bg-uhired-primary-blue-hover transition-all duration-150 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-uhired-primary-blue"
-                     onClick={() => {
-                       const jobDesc = document.getElementById('job-description-cl').value;
-                       const yourDetails = document.getElementById('your-details-cl').value;
-                       const prompt = `Write a cover letter for this job:\n${jobDesc}\n\nMy details:\n${yourDetails}`;
-                       callGeminiAPI(prompt, 'cl-loading-spinner', 'cover-letter-output', 'generate-cover-letter-btn');
-                     }}
-                   >
-                     <span className="mr-2">✨ Draft Cover Letter with AI</span>
-                     <span id="cl-loading-spinner" className="loading-spinner hidden"></span>
-                   </button>
-                   <div id="cover-letter-output" className="mt-4 p-4 border border-uhired-gray-200 rounded-md bg-uhired-gray-50 min-h-[200px] whitespace-pre-wrap text-sm"></div>
-               </div>
-          </div>
-          <div id="career-guide-content" className={`content-section ${activeSection === 'career-guide-content' ? 'active-content-section' : ''} bg-white p-6 rounded-lg shadow-lg`}>
-              <header className="mb-6"><h2 className="text-3xl font-bold text-uhired-gray-800">Career Guide</h2><p className="text-uhired-gray-600 mt-1">Personalized advice for your professional growth.</p></header><p className="text-uhired-gray-700">AI-driven insights, articles, and skill development resources...</p>
-          </div>
-          <div id="interview-coach-content" className={`content-section ${activeSection === 'interview-coach-content' ? 'active-content-section' : ''} bg-white p-6 rounded-lg shadow-lg`}>
-               <header className="mb-6"><h2 className="text-3xl font-bold text-uhired-gray-800">Interview Coach</h2><p className="text-uhired-gray-600 mt-1">Build confidence with AI-powered interview practice.</p></header>
-               <h3 className="text-xl font-semibold text-uhired-gray-700 mb-4">AI Interview Prep</h3>
-               <div className="space-y-4">
-                   <div><label htmlFor="job-title-ic" className="block text-sm font-medium text-uhired-gray-700 mb-1">Enter Job Title:</label><input type="text" id="job-title-ic" className="w-full p-3 border border-uhired-gray-300 rounded-md focus:ring-2 focus:ring-uhired-primary-blue focus:border-uhired-primary-blue transition-shadow" placeholder="E.g., Software Engineer, Marketing Manager"></div>
-                   <button id="generate-interview-questions-btn" className="inline-flex items-center px-6 py-3 bg-uhired-primary-blue text-white font-semibold rounded-lg hover:bg-uhired-primary-blue-hover transition-all duration-150 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-uhired-primary-blue"><span className="mr-2">✨ Generate Interview Questions</span><span id="iq-loading-spinner" className="loading-spinner hidden"></span></button>
-                   <div id="interview-questions-output" className="mt-4 p-4 border border-uhired-gray-200 rounded-md bg-uhired-gray-50 min-h-[200px] whitespace-pre-wrap text-sm"></div>
-               </div>
-          </div>
-           <div id="settings-content" className={`content-section ${activeSection === 'settings-content' ? 'active-content-section' : ''} bg-white p-6 rounded-lg shadow-lg`}>
-              <header className="mb-6"><h2 className="text-3xl font-bold text-uhired-gray-800">Settings</h2><p className="text-uhired-gray-600 mt-1">Manage your uHired preferences.</p></header>
-              <p className="text-uhired-gray-700">Account settings, notification preferences, and other options will appear here...</p>
-          </div>
-          <footer className="mt-10 pt-6 border-t border-uhired-gray-200 text-center text-sm text-uhired-gray-500">&copy; <span id="currentYear"></span> uHired. All rights reserved. Your Intelligent Career Companion.</footer>
         </div>
-      </main>
 
-      <div id="messageModal" ref={messageModalRef} className="modal-overlay">
-          <div className="modal-content">
-              <h3 id="modalTitle" ref={modalTitleElRef} className="text-xl font-semibold mb-3 text-uhired-gray-800">Message</h3>
-              <p id="modalMessage" ref={modalMessageElRef} className="text-sm text-uhired-gray-600 mb-6">This is a modal message.</p>
-              <button id="modalCloseButton" onClick={hideModal} className="w-full px-4 py-2.5 bg-uhired-primary-blue text-white font-semibold rounded-lg hover:bg-uhired-primary-blue-hover transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-uhired-primary-blue">Close</button>
+        {/* --- Right Column --- */}
+        <div className="space-y-8">
+          {/* Application Tracker Card */}
+          <div className="bg-[var(--color-component-background)] p-7 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)]">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-4">
+              Application Tracker
+            </h2>
+            <div className="flex justify-between text-center space-x-2 text-xs">
+              {applicationStats.map((stat) => (
+                <a
+                  key={stat.label}
+                  href="#"
+                  onClick={handleLinkClick}
+                  className="flex-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 no-underline"
+                >
+                  <p className={`font-bold text-xl ${stat.color}`}>
+                    {stat.count}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400 mt-0.5">
+                    {stat.label}
+                  </p>
+                </a>
+              ))}
+            </div>
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-5 mb-2">
+              Recent Activity
+            </h3>
+            <div className="space-y-2 text-xs">
+              {recentActivity.map((activity, index) => (
+                <p
+                  key={index}
+                  className="text-slate-600 dark:text-slate-400 flex items-start"
+                >
+                  <CheckCircleIcon className="w-3.5 h-3.5 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
+                  {activity}
+                </p>
+              ))}
+            </div>
           </div>
+
+          {/* Career Development Card REFINED */}
+          <div className="bg-[var(--color-component-background)] p-10 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)]">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-1">
+              Career Development
+            </h2>
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg text-xs text-slate-600 dark:text-slate-300 mb-4 flex items-start space-x-2">
+              <InfoIcon className="w-4 h-4 text-sky-500 flex-shrink-0 mt-0.5" />
+              <span>
+                Our AI compares your resume skills to market demand for your
+                target role. The bar shows how well you match what employers
+                need.
+              </span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm mb-2">
+                Your Current Skill Analysis
+              </h3>
+              <div className="space-y-3">
+                {skillData.map((skill) => (
+                  <div key={skill.name}>
+                    <div className="flex justify-between mb-1 text-xs font-medium">
+                      <span className="text-slate-700 dark:text-slate-300">
+                        {skill.name}
+                      </span>
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {skill.level}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
+                      <div
+                        className="bg-sky-600 h-1.5 rounded-full"
+                        style={{ width: `${skill.progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Development Ideas Card */}
+          <div className="bg-[var(--color-component-background)] p-10 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)]">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-4">
+              Development Ideas
+            </h2>
+            <div className="space-y-2">
+              {devRecommendations.map((rec) => (
+                <a
+                  key={rec.title}
+                  href="#"
+                  onClick={handleLinkClick}
+                  className="block p-2.5 bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-lg transition-colors no-underline"
+                >
+                  <p className="font-semibold text-xs text-slate-800 dark:text-slate-200">
+                    {rec.title}
+                  </p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    {rec.desc}
+                  </p>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Document Hub */}
+          <div className="bg-[var(--color-component-background)] p-9 rounded-xl shadow-lg ring-1 ring-inset ring-[var(--color-border-light)]">
+            <h2 className="text-lg font-bold text-[var(--color-text-heading-primary)] mb-4">
+              My Documents
+            </h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                <div className="flex items-center space-x-3 overflow-hidden">
+                  <PdfLogoIcon className="flex-shrink-0 w-5 h-5" />
+                  <div className="overflow-hidden">
+                    <p className="font-semibold text-xs truncate text-slate-800 dark:text-slate-200">
+                      Alex_Evans_Resume_2025.pdf
+                    </p>
+                    <span className="text-[10px] bg-sky-200 dark:bg-sky-900/50 text-sky-800 dark:text-sky-300 font-semibold px-2 py-0.5 rounded-full">
+                      Master
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLinkClick}
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex-shrink-0 ml-2"
+                >
+                  <MoreIcon className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                <div className="flex items-center space-x-3 overflow-hidden">
+                  <DocLogoIcon className="flex-shrink-0 w-5 h-5" />
+                  <div>
+                    <p className="font-semibold text-xs truncate text-slate-800 dark:text-slate-200">
+                      Cover_Letter_Fintech.docx
+                    </p>
+                    <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold px-2 py-0.5 rounded-full">
+                      Template
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLinkClick}
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex-shrink-0 ml-2"
+                >
+                  <MoreIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={handleLinkClick}
+              className="w-full mt-4 bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 py-2 rounded-lg text-xs font-semibold hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors flex items-center justify-center space-x-2"
+            >
+              <UploadIcon className="w-4 h-4" />
+              <span>Upload Document</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default DashboardPage;
